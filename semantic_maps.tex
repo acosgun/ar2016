@@ -113,7 +113,7 @@ The advantages of using laser scanners include high field of view and high accur
 Schulz \cite{schulz2001tracking} uses particle filters and statistical data association.
 Topp \cite{topp2005tracking} demonstrates that leg tracking in cluttered
 environments is possible, but prone to false positives. Bellotto \cite{bellotto2009multisensor} combine leg detection 
-and face tracking in a multi-modal tracking framework.
+and face tracking in a multi-modal tracking framework. Zanlungo \cite{zanlungo2011social} utilizes Social Forces Model to describe pedestrian motions, where parameters are trained with real pedestrian data. 
 
 Person tracking provides the robot with the position, and potentially orientation of the humans.
 However, richer information is typically needed for Human-Robot Interaction (HRI) applications. 
@@ -135,16 +135,14 @@ personal spaces as a ellipse-shaped Gaussian cost functions, and takes into acco
 the safety and vision fields of humans. Kirby \cite{kirby2009companion} presents a path planner that takes
 into account social conventions such as tending to one side of the hallways. One of the useful mobile robot applications that is widely studied is person following.
 A relevant body of work is pursuit evasion \cite{chung2011search}, in which the target is trying to evade the follower. In
-our applications, we assume that the target user is cooperating with the robot. 
-Some works considered using semantic information to improve robot navigation. 
-
-
-Zender \cite{zender2007human} considers context-awareness for person following, specifically handling of door and corridor passages. To
+our applications, we assume that the target user is cooperating with the robot. Another body of work involves robot navigation in dense human traffic. Trautman \cite{trautman2015robot} demonstrated a crowd navigation algorithm that performs comparably to human teleoperators. Kidokoro \cite{kidokoro2015simulation} simulates hypothetical situations using real data to anticipate how pedestrians' walking comfort would be affected.
+ 
+Some works considered using semantic information to improve robot navigation. Zender \cite{zender2007human} considers context-awareness for person following, specifically handling of door and corridor passages. To
 handle door passages, the robot increases its following distance and that leads the robot
 to wait for a while. Person following in a corridor is handled with an approach similar to
 Pacchierotti \cite{pacchierotti2005human}, and the robot’s speed is adjusted. Lu \cite{lu2013towards} show that using gaze cues makes 
 robot-human hallway passing more efficient. Loper \cite{loper2009mobile} presents a system that
-is capable of responding to verbal and non-verbal gestures and following a person.
+is capable of responding to verbal and non-verbal gestures and following a person. 
 
 \section{Semantic Mapping}
 \label{sec:slam_and_semantic_mapping}
@@ -186,16 +184,25 @@ robot poses through factors. GTSAM builds a factor graph of nonlinear measuremen
 by our system is shown in Figure \ref{fig:semantic_map}.
 
 A plane can be represented by the well known equation:
-$$ax + by + cz + d = 0$$
+
+\begin{equation}
+ax + by + cz + d = 0
+\end{equation}
+
 In this work, we make use of this representation, while additionally representing
 the plane’s extent by calculating the convex hull of the observed points. While only
 the plane normal and perpendicular distance are used for to correct the robot trajectory in SLAM, it is essential to keep track of the extent of planar patches, as many
 coplanar surfaces can exist in indoor environments, and we would like to represent
 these as distinct entities. We therefore represent planes as:
-$$p = [n, hull]$$ 
+\begin{equation}
+p = [n, hull]
+\end{equation}
 
 where:
-$$n = [a, b, c, d]$$ and \textit{hull} is a point cloud consisting of the vertices of the plane’s convex hull. As
+\begin{equation}
+n = [a, b, c, d]
+\end{equation}
+and \textit{hull} is a point cloud consisting of the vertices of the plane’s convex hull. As
 planes are re-observed, their hulls are extended with the hull observed in the new
 measurements. That is, the measured hull is projected onto the newly optimized
 landmark’s plane using its normal, and a new convex hull is calculated for the sum
@@ -213,7 +220,8 @@ used in our implementation.
 Given a robot pose $X_r$, a transform from the map frame to the robot frame in the form of $(R, \vec{t})$, a previously
 observed feature in the map frame $(\vec{n}, d)$ and a measured plane $(\vec{n}_m , \vec{d}_m )$, the measurement function $h$ is given by:
 
-$$h=\bigg(
+\begin{equation}
+h=\bigg(
 \begin{array}{c}
 R^T*\vec{n}\\
 \ \langle \vec{n},t\rangle + d \\
@@ -225,7 +233,7 @@ R^T*\vec{n}\\
 \ d_m\\
 \end{array}
 \bigg)
-$$
+\end{equation}
 
 The Jacobian with respect to the robot pose is then given by:
 
@@ -310,6 +318,8 @@ stops nearby the target landmark, and enters the requested label using the app. 
 
 We presented our method for building semantic maps in Section \ref{sec:slam_and_semantic_mapping}. We will assume that we have a metric and semantic map for the rest of this paper for simplicity. To enable a common ground between the humans and the robot, we developed an interactive procedure to annotate landmarks in the semantic map. In this procedure, the person guides the robot to the landmark of interest first and refers to the landmark of interest by pointing at it. The steps for labeling a landmark is shown in Figure \ref{fig:labeling_flow}. The robot follows the user around between labeling of landmarks. This allows the user to guide the robot to virtually any location in the environment. Our interactive map labeling approach was previously described in \cite{trevor2012interactive}.
 
+Various modalities could be used for the interaction model, such as speech or GUI-only. The reason why we combine the GUI with pointing gestures is that we think natural gestures would play an important role for human-robot interactions in the future.
+
 For the rest of this section, we describe the sub-components necessary to realize interactive labeling, namely person following (Section \ref{sec:person_following}), pointing gestures (Section \ref{sec:pointing_gestures}) and object labeling (Section \ref{sec:object_labeling}).
 
 \subsection{Person Following}
@@ -351,24 +361,38 @@ We represent a pointing ray in two angles: a ``horizontal" sense we denote as $\
 \end{figure}
 
 Given this coordinate frame and a potential target point P, we first transform it to the hand frame by:
-$$^{hand}p_{target} = T_{hand} * p_{target}$$
+\begin{equation}
+^{hand}p_{target} = T_{hand} * p_{target}
+\end{equation}
+
 We calculate the horizontal and vertical angles for a target point as $^{hand}p_{target} = (x_{targ}, y_{targ}, z_{targ})$ follows:
-$$[\theta_{target}\;\psi_{target}]=[atan2(x_{targ}, z_{targ})\;atan2(y_{targ}, z_{targ})]$$
+
+\begin{equation}
+[\theta_{target}\;\psi_{target}]=[atan2(x_{targ}, z_{targ})\;atan2(y_{targ}, z_{targ})]
+\end{equation}
 
 Where $atan2(y,x)$ is a function returns the value of the angle $\arctan(\frac{y}{x})$ with the correct sign.
 
 We estimate the likelihood of objects being the target using statistical data from previous pointing gesture observations. We observed that head-hand and elbow-hand methods returned different angle errors depending on the target location. Our approach relies on finding error statistics of these approaches, and compensating the error when the target object is searched for. First, given a set of prior pointing observations, we calculate the mean and variance of the vertical and horizontal angle errors for each pointing method. This analysis will be presented in Section \ref{sec:eval_pointing_gestures}. Given an input gesture, we apply correction to the pointing direction and find the Mahalanobis distance to each object in the scene.
 
 When a pointing gesture is recognized, and the angle pair $[\theta_{target}\;\psi_{target}]$ is found, and then a correction is applied by subtracting the mean terms from measured angles:
-$$[\theta_{cor}\;\;\psi_{cor}]=[\theta_{target}-\mu_{\theta}\;\;\;\psi_{target}-\mu_{\psi}]$$
+
+\begin{equation}
+[\theta_{cor}\;\;\psi_{cor}]=[\theta_{target}-\mu_{\theta}\;\;\;\psi_{target}-\mu_{\psi}]
+\end{equation}
  
 We also compute a covariance matrix for angle errors in this spherical coordinate system: 
-$$S_{type} = \begin{bmatrix}
+\begin{equation}
+S_{type} = \begin{bmatrix}
 \sigma_{\theta}&0\\ 0&\sigma_{\psi}
-\end{bmatrix} $$
+\end{bmatrix}
+\end{equation}
 
 We get the values for $\mu_{\theta}, \mu_{\psi}, \sigma_{\theta} ,\sigma_{\psi}$ from Table~\ref{table:pointing_error_stats} for the corresponding gesture type and closest target location. We then compute the mahalanobis distance to the target by:
-$$D_{mah}(target,method)=\sqrt{ [\theta_{cor}\;\psi_{cor}]^T S_{method}^{-1} [\theta_{cor}\;\psi_{cor}]}$$
+
+\begin{equation}
+D_{mah}(target,method)=\sqrt{ [\theta_{cor}\;\psi_{cor}]^T S_{method}^{-1} [\theta_{cor}\;\psi_{cor}]}
+\end{equation} 
  
 We use $D_{mah}$ to estimate which target or object is intended. We consider two use cases: the objects are represented as a point or a point cloud. For point targets, we first filter out targets that have a Mahalanobis distance larger than a threshold $D_{mah} > D_{thresh}$. If none of the targets has a $D_{mah}$ lower than the threshold, then we decide the user did not point to any targets. If there are multiple targets that has $D_{mah} \leq D_{thresh}$ , then we determine ambiguity by employing a ratio test. The ratio of the least $D_{mah}$ and the second-least $D_{mah}$ among all targets is compared with a threshold to determine if there is ambiguity. If the ratio is higher than a threshold, then the robot can resort to additional action, such as initiating a dialogue to ask or confirm the intended object.
 
@@ -608,7 +632,7 @@ We model the task scenario during person following as a state machine, where tra
 \item Release: Robot detects the end of event and continues with the basic following behavior
 \end{enumerate}
 
-We focus on two specific scenarios of context-aware person following, using the 4-phase model: following for labeling in Section \ref{sec:following_for labeling} and passing doors in Section \ref{sec:following_door_passing}.
+We focus on two specific scenarios of context-aware person following, using the 4-phase model: following for labeling in Section \ref{sec:following_for labeling} and passing doors in Section \ref{sec:following_door_passing}. For both of the scenarios, we demonstrate the capability with a user who is knowledgeable of the robot's capabilities.
 
 \subsubsection{Following for Interactive Labeling}
 \label{sec:following_for labeling}
@@ -674,7 +698,7 @@ The local and global costs are fetched from the normalized local costmap, which 
 
 \begin{table}[ht!]
 
-	\caption{Conditions to trigger phases when the user is involved with the Landmark Labeling Event during following.}
+	
     \centering
 		
   \begin{tabular}{l |  m{10cm}}
@@ -687,6 +711,7 @@ The local and global costs are fetched from the normalized local costmap, which 
     Release & {$dist(user, convex hull(landmark))>threshold$}\\ 
     \bottomrule
   \end{tabular}
+	\caption{Conditions to trigger phases when the user is involved with the Landmark Labeling Event during following.}    
     \label{table:situation_aware_list_landmark}
 \end{table}
 
@@ -702,7 +727,6 @@ The second behavior we inspect during person following is door passing. In our e
 The robot can assume that the user might be intending to open, close or pass through a door when the user is approaching the door. In our approach, the robot continuously monitors user's proximity to the doors using the semantic map, if the door signs were detected and added to the semantic map beforehand, as explained in Section \ref{sec:door_signs}.
 
 \begin{table}[ht!]
-	\caption{Conditions to trigger phases when the user is passing through a door during following.}
 	\centering
   \begin{tabular}{l |  m{10cm}}    
     \toprule    
@@ -714,6 +738,7 @@ The robot can assume that the user might be intending to open, close or pass thr
     Release & {$dist(user, convexhull(door))>threshold$ }\\ 
     \bottomrule
   \end{tabular}
+    \caption{Conditions to trigger phases when the user is passing through a door during following.}
     \label{table:situation_aware_list_door}
 \end{table}
 
@@ -753,7 +778,12 @@ Our pointing gesture approach can reliably estimate the target object using huma
 
 Semantic maps would facilitate communication of goals from a HRI perspective and enable navigation behaviors that are not feasible with metric maps. We showed proof of concept for enabling context-aware navigation behaviors using semantics and believe that there is much to explore in this research area. We think as the sensing technology improves and maps with richer semantic information becomes common, it would make intelligent navigation algorithms possible.
 
-One limitation of our work is that there is only implicit interaction between the robot and human in our interaction design. The robot signaled its intention only through motion and did not explicitly communicate with people. As future work, dialogue and gaze could be utilized to complement the motions of the robot. We also plan to evaluate the effectiveness of context-awareness navigation with user studies.
+One limitation of our work is that there is only implicit interaction between the robot and human in our interaction design. The robot signaled its intention only through motion and did not explicitly communicate with people. As future work, dialogue and gaze could be utilized to complement the motions of the robot. 
+
+%We also plan to evaluate the effectiveness of context-awareness navigation with user studies.
+
+We think implementation and qualitative validation of robot behavior is a critical first step for path planning algorithms among humans. In this paper, we showed that our approach produced sound solutions in a number of example scenarios. As future work, we think effectiveness of context-aware navigation could be evaluated with usability studies with users who are not familiar with the robot. Moreover, scenarios could be performed under different conditions the to test the generality and validate the robustness of the system.
+
 
 \bibliographystyle{tADR}
 \bibliography{semantic_maps}
